@@ -21,3 +21,13 @@ This generated version was then hand tweaked to make it more suitable for
 ANTLR consumption. Among other changes, mutually left recursive productions were folded into
 parent productions. The main focus of the changes were related to the _value expression_
 and _primary value expression_ productions.
+
+## Permissiveness
+The Grammar itself is more permissive than a GQL implementation would be. Some
+type checking and other syntatic analysis would be required as post processing
+steps to parsing using the grammar.
+
+## Testing and Verification
+Not a lot of testing has been done to date, besides spot checking using
+various hand generate snippets of GQL. In the future we will add tkl based
+tests to verify the grammar.
