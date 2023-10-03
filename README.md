@@ -25,7 +25,7 @@ and _primary value expression_ productions.
 
 ## Permissiveness
 The Grammar itself is more permissive than a GQL implementation would be. Some
-type checking and other syntatic analysis would be required as post processing
+type checking and other syntatic analysis would be required as post-processing
 steps to parsing using the grammar.
 
 ## Testing and Verification
