@@ -36,7 +36,7 @@ tests to verify the grammar.
 ## TCK Tests
 This repo now includes a small number of TCK Tests. The tests were lifted from
 the Cypher repo and adjusted by hand to adhere to the grammar differences
-between Cyphe and GQL.
+between Cypher and GQL.
 
 Many tests fail because post-processing semantics are not implemented. e.g. variable
 previously declared. But many tests succeed that test only the basic syntax
