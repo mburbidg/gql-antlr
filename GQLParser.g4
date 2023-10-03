@@ -289,7 +289,7 @@ primitiveCatalogModifyingStatement
    | dropGraphTypeStatement
    ;
 
-// 12.2 <create schema statement>
+// 12.2 <insert schema statement>
 
 createSchemaStatement
     : 'CREATE' 'SCHEMA' ('IF' 'NOT' 'EXISTS')? catalogSchemaParentAndName
@@ -301,7 +301,7 @@ dropSchemaStatement
     : 'DROP' 'SCHEMA' ('IF' 'EXISTS')? catalogSchemaParentAndName
     ;
 
-// 12.4 <create graph statement>
+// 12.4 <insert graph statement>
 
 createGraphStatement
    : 'CREATE' ('PROPERTY'? 'GRAPH' ('IF' 'NOT' 'EXISTS')? | 'OR' 'REPLACE' 'PROPERTY'? 'GRAPH') catalogGraphParentAndName (openGraphType | ofGraphType) graphSource?

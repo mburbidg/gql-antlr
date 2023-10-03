@@ -32,3 +32,18 @@ steps to parsing using the grammar.
 Not a lot of testing has been done to date, besides spot checking using
 various hand generate snippets of GQL. In the future we will add tkl based
 tests to verify the grammar.
+
+## TCK Tests
+This repo now includes a small number of TCK Tests. The tests were lifted from
+the Cypher repo and adjusted by hand to adhere to the grammar differences
+between Cyphe and GQL.
+
+Many tests fail because post-processing semantics are not implemented. e.g. variable
+previously declared. But many tests succeed that test only the basic syntax
+implemented by the ANTLR grammar.
+
+To run the TCK tests use the following command.
+
+```
+make tck_test
+```
