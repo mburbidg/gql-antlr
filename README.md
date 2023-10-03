@@ -1,6 +1,6 @@
 # gql-antlr
 This repository contains an ANTLR grammar for Graph Query Language (GQL) based on the August 2023
-GQL Specification Proposal.
+GQL Specification Draft.
 
 The grammar is language independent.
 
