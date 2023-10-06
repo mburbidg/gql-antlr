@@ -26,7 +26,7 @@ Feature: Insert1 - Inserting nodes
     Given an empty graph
     When executing query:
       """
-      INSERT ("Label")
+      INSERT (:Label)
       """
     Then the result should be empty
     And the side effects should be:
@@ -37,7 +37,7 @@ Feature: Insert1 - Inserting nodes
     Given an empty graph
     When executing query:
       """
-      INSERT ("Label"), ("Label")
+      INSERT (:Label), (:Label)
       """
     Then the result should be empty
     And the side effects should be:
@@ -48,7 +48,7 @@ Feature: Insert1 - Inserting nodes
     Given an empty graph
     When executing query:
       """
-      INSERT (A&B&C&D)
+      INSERT (:A&B&C&D)
       """
     Then the result should be empty
     And the side effects should be:
@@ -59,7 +59,7 @@ Feature: Insert1 - Inserting nodes
     Given an empty graph
     When executing query:
       """
-      INSERT (B&A&D), (B&C), (D&E&B)
+      INSERT (:B&A&D), (:B&C), (:D&E&B)
       """
     Then the result should be empty
     And the side effects should be:
@@ -134,7 +134,7 @@ Feature: Insert1 - Inserting nodes
     Given an empty graph
     When executing query:
       """
-      INSERT (p TheLabel {id: 4611686018427387905})
+      INSERT (p :TheLabel {id: 4611686018427387905})
       RETURN p.id
       """
     Then the result should be, in any order:
@@ -168,8 +168,8 @@ Feature: Insert1 - Inserting nodes
     Given an empty graph
     When executing query:
       """
-      INSERT (n Foo)-["T1"]->(),
-             (n Bar)-["T2"]->()
+      INSERT (n Foo)-[:T1]->(),
+             (n Bar)-[:T2]->()
       """
     Then a SyntaxError should be raised at compile time: VariableAlreadyBound
 
@@ -178,7 +178,7 @@ Feature: Insert1 - Inserting nodes
     Given an empty graph
     When executing query:
       """
-      INSERT ()<-["T2"]-(n Foo),
+      INSERT ()<-[:T2]-(n Foo),
              (n Bar)<-["T1"]-()
       """
     Then a SyntaxError should be raised at compile time: VariableAlreadyBound

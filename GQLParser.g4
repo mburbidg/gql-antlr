@@ -1094,7 +1094,7 @@ labelAndPropertySetSpecification
    ;
 
 labelSetSpecification
-   : labelName (AMPERSAND labelName)*
+   : isOrColon labelName (AMPERSAND labelName)*
    ;
 
 // 16.12 <label expression>
