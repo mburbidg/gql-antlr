@@ -1109,6 +1109,7 @@ labelExpression
 labelPrimary
     : labelName
     | wildcardLabel
+    | parenthesizedLabelExpression
     ;
 
 wildcardLabel: PERCENT;
