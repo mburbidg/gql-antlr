@@ -1040,7 +1040,7 @@ parenthesizedPathPatternExpression
    ;
 
 subpathVariableDeclaration
-   : 'SUBPATH_VARIABLE' EQUALS_OPERATOR
+   : subpathVariable EQUALS_OPERATOR
    ;
 
 parenthesizedPathPatternWhereClause
@@ -2868,6 +2868,10 @@ valueVariable
     ;
 
 bindingVariable
+    : REGULAR_IDENTIFIER
+    ;
+
+subpathVariable
     : REGULAR_IDENTIFIER
     ;
 
