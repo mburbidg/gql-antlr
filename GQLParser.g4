@@ -17,12 +17,8 @@ programActivity
    ;
 
 sessionActivity
-   : sessionActivityCommand+
-   ;
-
-sessionActivityCommand
-   : sessionSetCommand
-   | sessionResetCommand
+   : sessionResetCommand+
+   | sessionSetCommand sessionResetCommand+
    ;
 
 transactionActivity
@@ -55,7 +51,7 @@ sessionSetTimeZoneClause
    ;
 
 setTimeZoneValue
-   : stringValueExpression
+   : timeZoneString
    ;
 
 sessionSetParameterClause
@@ -77,7 +73,7 @@ sessionSetValueParameterClause
    ;
 
 sessionSetParameterName
-   : ('IF' 'NOT' 'EXISTS')? parameterName
+   : ('IF' 'NOT' 'EXISTS')? sessionParameterSpecification
    ;
 
 // 7.2 <session reset command>
@@ -91,7 +87,7 @@ sessionResetArguments
    | 'SCHEMA'
    | 'PROPERTY'? 'GRAPH'
    | 'TIME' 'ZONE'
-   | 'PARAMETER'? parameterName
+   | 'PARAMETER'? sessionParameterSpecification
    ;
 
 // 7.3 <session close command>
@@ -625,8 +621,13 @@ forStatement
    ;
 
 forItem
-   : forItemAlias listValueExpression
+   : forItemAlias forItemSource
    ;
+
+forItemSource
+    : listValueExpression
+    | bindingTableReferenceValueExpression
+    ;
 
 forItemAlias
    : identifier 'IN'
@@ -782,13 +783,19 @@ pathVariableReference
     : bindingVariableReference
     ;
 
-// 16.6 <parameter>
+// 16.6 <dynamic parameter specification>
 
-parameter
-    : parameterName
+dynamicParameterSpecification
+    : generalParameterReference
     ;
 
-// 16.7 <graph pattern binding table>
+// 16.7 <session parameter specification>
+
+sessionParameterSpecification
+    : generalParameterReference
+    ;
+
+// 16.8 <graph pattern binding table>
 
 graphPatternBindingTable
     : graphPattern graphPatternYieldClause?
@@ -807,7 +814,8 @@ graphPatternYieldItem
     : elementVariableReference
     | pathVariableReference
     ;
-// 16.8 <graph pattern>
+
+// 16.9 <graph pattern>
 
 graphPattern
     : matchMode? pathPatternList keepClause? graphPatternWhereClause?
@@ -855,7 +863,7 @@ graphPatternWhereClause
     : 'WHERE' searchCondition
     ;
 
-// 16.9 <path pattern prefix>
+// 16.10 <path pattern prefix>
 
 pathPatternPrefix
     : pathModePrefix
@@ -880,7 +888,7 @@ pathOrPaths: 'PATH' | 'PATHS';
 
 anyPathSearch: 'ANY' numberOfPaths? pathMode? pathOrPaths?;
 
-numberOfPaths: unsignedIntegerSpecification;
+numberOfPaths: nonNegativeIntegerSpecification;
 
 shortestPathSearch
     : allShortestPathsSearch
@@ -897,9 +905,9 @@ countedShortestPathsSearch: 'SHORTEST' numberOfPaths pathMode? pathOrPaths?;
 
 countedShortestGroupSearch: 'SHORTEST' numberOfGroups? pathMode? pathOrPaths? ('GROUP' | 'GROUPS');
 
-numberOfGroups: unsignedIntegerSpecification;
+numberOfGroups: nonNegativeIntegerSpecification;
 
-// 16.10 <path pattern expression>
+// 16.11 <path pattern expression>
 
 pathPatternExpression
    : pathTerm
@@ -1047,7 +1055,7 @@ parenthesizedPathPatternWhereClause
    : 'WHERE' searchCondition
    ;
 
-// 16.11 <insert graph pattern>
+// 16.12 <insert graph pattern>
 
 insertGraphPattern
    : insertPathPatternList
@@ -1089,15 +1097,15 @@ insertElementPatternFiller
    ;
 
 labelAndPropertySetSpecification
-   : labelSetSpecification elementPropertySpecification?
-   | labelSetSpecification? elementPropertySpecification
+   : isOrColon labelSetSpecification elementPropertySpecification?
+   | isOrColon labelSetSpecification? elementPropertySpecification
    ;
 
 labelSetSpecification
-   : isOrColon labelName (AMPERSAND labelName)*
+   : labelName (AMPERSAND labelName)*
    ;
 
-// 16.12 <label expression>
+// 16.13 <label expression>
 
 labelExpression
     : labelPrimary
@@ -1118,7 +1126,7 @@ parenthesizedLabelExpression
     : LEFT_PAREN labelExpression RIGHT_PAREN
     ;
 
-// 16.13 <graph pattern quantifier>
+// 16.14 <graph pattern quantifier>
 
 graphPatternQuantifier
    : ASTERISK
@@ -1142,7 +1150,7 @@ lowerBound
 upperBound
    : unsignedInteger
    ;
-// 16.14 <simplified path pattern expression>
+// 16.15 <simplified path pattern expression>
 
 simplifiedPathPatternExpression
    : simplifiedDefaultingLeft
@@ -1277,13 +1285,13 @@ simplifiedPrimary
    | LEFT_PAREN simplifiedContents RIGHT_PAREN
    ;
 
-// 16.15 <where clause>
+// 16.16 <where clause>
 
 whereClause
    : 'WHERE' searchCondition
    ;
 
-// 16.16 <yield clause>
+// 16.17 <yield clause>
 
 yieldClause
    : 'YIELD' yieldItemList
@@ -1305,7 +1313,7 @@ yieldItemAlias
    : 'AS' bindingVariable
    ;
 
-// 16.17 <group by clasue>
+// 16.18 <group by clasue>
 
 groupByClause
    : 'GROUP' 'BY' groupingElementList
@@ -1324,13 +1332,13 @@ emptyGroupingSet
    : LEFT_PAREN RIGHT_PAREN
    ;
 
-// 16.18 <order by clasue>
+// 16.19 <order by clasue>
 
 orderByClause
    : 'ORDER' 'BY' sortSpecificationList
    ;
 
-// 16.19 <aggregate function>
+// 16.20 <aggregate function>
 
 aggregateFunction
     : 'COUNT' '(*)'
@@ -1360,7 +1368,7 @@ independentValueExpression
     : numericValueExpression
     ;
 
-// 16.20 <sort specification list>
+// 16.21 <sort specification list>
 
 sortSpecificationList
    : sortSpecification (COMMA sortSpecification)*
@@ -1386,16 +1394,16 @@ nullOrdering
    | 'NULLS' 'LAST'
    ;
 
-// 16.21 <limit clause>
+// 16.22 <limit clause>
 
 limitClause
-   : 'LIMIT' unsignedIntegerSpecification
+   : 'LIMIT' nonNegativeIntegerSpecification
    ;
 
-// 16.22 <offset clause>
+// 16.23 <offset clause>
 
 offsetClause
-   : offsetSynonym unsignedIntegerSpecification
+   : offsetSynonym nonNegativeIntegerSpecification
    ;
 
 offsetSynonym
@@ -1791,10 +1799,6 @@ temporalInstantType
    | localtimeType
    ;
 
-temporalDurationType
-   : durationType
-   ;
-
 datetimeType
    : 'ZONED' 'DATETIME' notNull?
    | 'TIMESTAMP' 'WITH' 'TIME' 'ZONE' notNull?
@@ -1818,6 +1822,15 @@ localtimeType
    : 'LOCAL' 'TIME' notNull?
    | 'TIME' 'WITHOUT' 'TIME' 'ZONE' notNull?
    ;
+
+temporalDurationType
+   : 'DURATION' LEFT_PAREN temporalDurationQuantifier RIGHT_PAREN notNull?
+   ;
+
+temporalDurationQuantifier
+    : 'YEAR' 'TO' 'MONTH'
+    | 'DAY' 'TO' 'SECOND'
+    ;
 
 durationType
    : 'DURATION' notNull?
@@ -1874,7 +1887,7 @@ openEdgeReferenceValueType
    ;
 
 listValueType
-   : (listValueTypeName LEFT_ANGLE_BRACKET valueType RIGHT_ANGLE_BRACKET | valueType listValueTypeName) (LEFT_BRACKET maxLength RIGHT_BRACKET)? notNull?
+   : (listValueTypeName LEFT_ANGLE_BRACKET valueType RIGHT_ANGLE_BRACKET | valueType? listValueTypeName) (LEFT_BRACKET maxLength RIGHT_BRACKET)? notNull?
    ;
 
 listValueTypeName
@@ -1909,7 +1922,7 @@ fieldType
 schemaReference
    : absoluteCatalogSchemaReference
    | relativeCatalogSchemaReference
-   | referenceParameter
+   | referenceParameterSpecification
    ;
 
 absoluteCatalogSchemaReference
@@ -1950,7 +1963,7 @@ graphReference
     : catalogObjectParentReference graphName
     | delimitedGraphName
     | homeGraph
-    | referenceParameter
+    | referenceParameterSpecification
     ;
 
 catalogGraphParentAndName
@@ -1963,7 +1976,7 @@ homeGraph: 'HOME_PROPERTY_GRAPH' | 'HOME_GRAPH';
 
 graphTypeReference
    : catalogGraphTypeParentAndName
-   | referenceParameter
+   | referenceParameterSpecification
    ;
 
 catalogGraphTypeParentAndName
@@ -1975,7 +1988,7 @@ catalogGraphTypeParentAndName
 bindingTableReference
     : catalogObjectParentReference bindingTableName
     | delimitedBindingTableName
-    | referenceParameter
+    | referenceParameterSpecification
     ;
 
 catalogBindingTableParentAndName
@@ -1986,7 +1999,7 @@ catalogBindingTableParentAndName
 
 procedureReference
    : catalogProcedureParentAndName
-   | referenceParameter
+   | referenceParameterSpecification
    ;
 
 catalogProcedureParentAndName
@@ -2000,10 +2013,10 @@ catalogObjectParentReference
    |  (objectName PERIOD)+
    ;
 
-// 18.7 <reference parameter>
+// 18.7 <reference parameter specification>
 
-referenceParameter
-    : parameter
+referenceParameterSpecification
+    : substitutedParameterReference
     ;
 
 // 19.1 <search condition>
@@ -2134,28 +2147,13 @@ propertyExistsPredicate
    : 'PROPERTY_EXISTS' LEFT_PAREN elementVariableReference COMMA 'PROPERTY_NAME' RIGHT_PAREN
    ;
 
-// 20.1 <value specification>
-
-unsignedValueSpecification
-    : unsignedLiteral
-    | parameterValueSpecification
-    ;
-
-unsignedIntegerSpecification: valueExpression;
-
-parameterValueSpecification
-    : parameter
-    | predefinedParameter
-    ;
-
-predefinedParameter: 'CURRENT_USER';
-
-// 20.2 <value expression>
+// 20.1 <value expression>
 
 valueExpression
     : valueExpressionPrimary
     | numericValueFunction
-    | stringValueFunction
+    | characterStringFunction
+    | byteStringFunction
     | datetimeValueFunction
     | listValueFunction
     | durationValueFunction
@@ -2168,7 +2166,7 @@ valueExpression
     | valueExpression op = ('OR' | 'XOR') valueExpression
     | valueExpression compOp valueExpression
     | valueExpression CONCATENATION_OPERATOR valueExpression    // Applies to character strings, byte strings, paths and lists
-    | 'DURATION_BETWEEN' LEFT_PAREN datetimeSubtractionParameters RIGHT_PAREN
+    | 'DURATION_BETWEEN' LEFT_PAREN datetimeSubtractionParameters RIGHT_PAREN temporalDurationQuantifier?
     | 'PROPERTY'? 'GRAPH' graphExpression
     | 'BINDING'? 'TABLE' bindingTableExpression
     ;
@@ -2188,6 +2186,25 @@ nodeReferenceValueExpression: valueExpressionPrimary;
 edgeReferenceValueExpression: valueExpressionPrimary;
 
 aggregatingValueExpression: valueExpression;
+
+bindingTableReferenceValueExpression: valueExpressionPrimary;
+
+// 20.2 <value specification>
+
+unsignedValueSpecification
+    : unsignedLiteral
+    | generalValueSpecification
+    ;
+
+nonNegativeIntegerSpecification
+    : unsignedInteger
+    | dynamicParameterSpecification
+    ;
+
+generalValueSpecification
+    : dynamicParameterSpecification
+    | 'SESSION_USER'
+    ;
 
 // 20.3 <boolean value expression>
 
@@ -2241,6 +2258,7 @@ nonParenthesizedValueExpressionPrimarySpecialCase: valueExpressionPrimary;
 
 numericValueFunction
    : lengthExpression
+   | cardinalityExpression
    | absoluteValueExpression
    | modulusExpression
    | trigonometricFunction
@@ -2259,6 +2277,16 @@ lengthExpression
    | byteLengthExpression
    | pathLengthExpression
    ;
+
+cardinalityExpression
+    : 'CARDINALITY' LEFT_PAREN cardinalityExpressionArgument RIGHT_PAREN
+    | 'SIZE' LEFT_PAREN listValueExpression RIGHT_PAREN
+    ;
+
+cardinalityExpressionArgument
+    : bindingTableReferenceValueExpression
+    | listValueExpression
+    ;
 
 charLengthExpression
    : ('CHAR_LENGTH' | 'CHARACTER_LENGTH') LEFT_PAREN characterStringValueExpression RIGHT_PAREN
@@ -2362,11 +2390,6 @@ stringValueExpression: valueExpression;
 
 // 20.8 <string value function>
 
-stringValueFunction
-   : characterStringFunction
-   | byteStringFunction
-   ;
-
 characterStringFunction
    : substringFunction
    | fold
@@ -2415,6 +2438,12 @@ normalizeFunction
 
 normalForm: 'NFC' | 'NFD' | 'NFKC' | 'NFKD';
 
+stringLength
+   : numericValueExpression
+   ;
+
+// 20.9 <byte string function
+
 byteStringFunction
    : byteStringSubstringFunction
    | byteStringTrimFunction
@@ -2440,16 +2469,12 @@ trimByteString
    : byteStringValueExpression
    ;
 
-stringLength
-   : numericValueExpression
-   ;
-
-// 20.9 <datetime value expression>
+// 20.10 <datetime value expression>
 // Folded into valueExpression
 
 datetimeValueExpression: valueExpression;
 
-// 20.10 <datetime value function>
+// 20.11 <datetime value function>
 
 datetimeValueFunction
    : dateFunction
@@ -2498,12 +2523,12 @@ datetimeFunctionParameters
    | recordValueConstructor
    ;
 
-// 20.11 <duration value expression>
+// 20.12 <duration value expression>
 // Folded into valueExpression
 
 durationValueExpression: valueExpression;
 
-// 20.12 <duration value function>
+// 20.13 <duration value function>
 
 durationValueFunction
    : durationFunction
@@ -2523,12 +2548,12 @@ durationAbsoluteValueFunction
    : 'ABS' LEFT_PAREN durationValueExpression RIGHT_PAREN
    ;
 
-// 20.13 <list value expression>
+// 20.14 <list value expression>
 // Folded into valueExpression
 
 listValueExpression: valueExpression;
 
-// 20.14 <list value function>
+// 20.15 <list value function>
 
 listValueFunction
    : trimListFunction
@@ -2543,7 +2568,7 @@ elementsFunction
    : 'ELEMENTS' LEFT_PAREN pathValueExpression RIGHT_PAREN
    ;
 
-// 20.15 <list value constructor>
+// 20.16 <list value constructor>
 
 listValueConstructor
    : listValueConstructorByEnumeration
@@ -2561,7 +2586,7 @@ listElement
    : valueExpression
    ;
 
-// 20.16 <record value constructor>
+// 20.17 <record value constructor>
 
 recordValueConstructor
    : 'RECORD'? fieldsSpecification
@@ -2575,18 +2600,18 @@ fieldList
    : field (COMMA field)*
    ;
 
-// 20.17 <field>
+// 20.18 <field>
 
 field
     : fieldName COLON valueExpression
     ;
 
-// 20.18 <path value expression>
+// 20.19 <path value expression>
 // Folded into valueExpression
 
 pathValueExpression: valueExpression;
 
-// 20.19 <path value constructor>
+// 20.20 <path value constructor>
 
 pathValueConstructor
    : pathValueConstructorByEnumeration
@@ -2608,16 +2633,16 @@ pathElementListStep
    : COMMA valueExpression COMMA valueExpression        // Can these be valueExpressionPrimary?
    ;
 
-// 20.20 <property reference>
+// 20.21 <property reference>
 // Folded into valueExpressionPrimary
 
-// 20.21 <value query expression>
+// 20.22 <value query expression>
 
 valueQueryExpression
     : 'VALUE' nestedQuerySpecification
     ;
 
-// 20.22 <case expression>
+// 20.23 <case expression>
 
 caseExpression
    : caseAbbreviation
@@ -2684,7 +2709,7 @@ resultExpression
    : valueExpression
    ;
 
-// 20.23 <cast specification>
+// 20.24 <cast specification>
 
 castSpecification
    : 'CAST' LEFT_PAREN castOperand 'AS' castTarget RIGHT_PAREN
@@ -2692,19 +2717,20 @@ castSpecification
 
 castOperand
    : valueExpression
+   | nullLiteral
    ;
 
 castTarget
    : valueType
    ;
 
-// 20.24 <element_id function>
+// 20.25 <element_id function>
 
 elementIdFunction
    : 'ELEMENT_ID' LEFT_PAREN elementVariableReference RIGHT_PAREN
    ;
 
-// 20.25 <let value expression>
+// 20.26 <let value expression>
 
 letValueExpression
    : 'LET' letVariableDefinitionList 'IN' valueExpression 'END'
@@ -2777,6 +2803,8 @@ timeString: unbrokenCharacterStringLiteral;
 datetimeLiteral: ('DATETIME' | 'TIMESTAMP') datetimeString;
 
 datetimeString: unbrokenCharacterStringLiteral;
+
+timeZoneString: unbrokenCharacterStringLiteral;
 
 durationLiteral
     : 'DURATION' durationString
@@ -2902,7 +2930,16 @@ delimitedIdentifier
     ;
 
 parameterName
-    : DOLLAR_SIGN (EXTENDED_IDENTIFER | delimitedIdentifier)
+    : separatedIdentifier
+    ;
+
+substitutedParameterReference
+    : DOUBLE_DOLLAR_SIGN parameterName
+    ;
+
+generalParameterReference
+    : DOLLAR_SIGN
+    | parameterName
     ;
 
 // Scanner Rules
@@ -2998,6 +3035,7 @@ fragment SIGN : '-' | '+';
 
 COMMERCIAL_AT: '@';
 DOLLAR_SIGN: '$';
+DOUBLE_DOLLAR_SIGN: '$$';
 DOUBLE_COLON: '::';
 DOUBLE_PERIOD: '..';
 DOUBLE_QUOTE: '"';
