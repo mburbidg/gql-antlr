@@ -7,8 +7,8 @@ options {
 // 6 <GQL-program>
 
 gqlProgram
-   : programActivity sessionCloseCommand?
-   | sessionCloseCommand
+   : programActivity sessionCloseCommand? EOF
+   | sessionCloseCommand EOF
    ;
 
 programActivity
