@@ -73,7 +73,7 @@ sessionSetValueParameterClause
    ;
 
 sessionSetParameterName
-   : ('IF' 'NOT' 'EXISTS')? sessionParameterSpecification
+   : ifNotExists? sessionParameterSpecification
    ;
 
 // 7.2 <session reset command>
@@ -113,8 +113,8 @@ transactionMode
    ;
 
 transactionAccessMode
-   : 'READ' 'ONLY'
-   | 'READ' 'WRITE'
+   : 'READ' 'ONLY'      #readOnly
+   | 'READ' 'WRITE'     #readWrite
    ;
 
 // 8.3 <rollback command>
@@ -135,31 +135,35 @@ nestedProcedureSpecification
    : LEFT_BRACE procedureSpecification RIGHT_BRACE
    ;
 
+// <catalog-modifying procedure specification>, <data-modifying procedure specification> and <query specification> are
+// identical productions. The specification distinguishes them in the BNF, but in the implementation, the distinction
+// has to be made sematically, in code, based on the kind of statements contained in the <procedure specification>.
 procedureSpecification
-   : catalogModifyingProcedureSpecification
-   | dataModifyingProcedureSpecification
-   | querySpecification
+   : procedureBody
+//   : catalogModifyingProcedureSpecification
+//   | dataModifyingProcedureSpecification
+//   | querySpecification
    ;
 
-catalogModifyingProcedureSpecification
-   : procedureBody
-   ;
+//catalogModifyingProcedureSpecification
+//   : procedureBody
+//   ;
 
 nestedDataModifyingProcedureSpecification
-   : LEFT_BRACE dataModifyingProcedureSpecification RIGHT_BRACE
+   : LEFT_BRACE procedureBody RIGHT_BRACE
    ;
 
-dataModifyingProcedureSpecification
-   : procedureBody
-   ;
+//dataModifyingProcedureSpecification
+//   : procedureBody
+//   ;
 
 nestedQuerySpecification
-   : LEFT_BRACE querySpecification RIGHT_BRACE
+   : LEFT_BRACE procedureBody RIGHT_BRACE
    ;
 
-querySpecification
-   : procedureBody
-   ;
+//querySpecification
+//   : procedureBody
+//   ;
 
 // 9.2 <procedure body>
 
@@ -288,19 +292,19 @@ primitiveCatalogModifyingStatement
 // 12.2 <insert schema statement>
 
 createSchemaStatement
-    : 'CREATE' 'SCHEMA' ('IF' 'NOT' 'EXISTS')? catalogSchemaParentAndName
+    : 'CREATE' 'SCHEMA' ifNotExists? catalogSchemaParentAndName
     ;
 
 // 12.3 <drop schema statement>
 
 dropSchemaStatement
-    : 'DROP' 'SCHEMA' ('IF' 'EXISTS')? catalogSchemaParentAndName
+    : 'DROP' 'SCHEMA' ifExists? catalogSchemaParentAndName
     ;
 
 // 12.4 <insert graph statement>
 
 createGraphStatement
-   : 'CREATE' ('PROPERTY'? 'GRAPH' ('IF' 'NOT' 'EXISTS')? | 'OR' 'REPLACE' 'PROPERTY'? 'GRAPH') catalogGraphParentAndName (openGraphType | ofGraphType) graphSource?
+   : 'CREATE' ('PROPERTY'? 'GRAPH' ifNotExists? | 'OR' 'REPLACE' 'PROPERTY'? 'GRAPH') catalogGraphParentAndName (openGraphType | ofGraphType) graphSource?
    ;
 
 openGraphType
@@ -324,13 +328,13 @@ graphSource
 // 12.5 <drop graph statement>
 
 dropGraphStatement
-    : 'DROP' 'PROPERTY'? 'GRAPH' ('IF' 'EXISTS')? catalogGraphParentAndName
+    : 'DROP' 'PROPERTY'? 'GRAPH' ifExists? catalogGraphParentAndName
     ;
 
 // 12.6 <graph type statement>
 
 createGraphTypeStatement
-   : 'CREATE' ('PROPERTY'? 'GRAPH' 'TYPE' ('IF' 'NOT' 'EXISTS')? | 'OR' 'REPLACE' 'PROPERTY'? 'GRAPH' 'TYPE') catalogGraphTypeParentAndName graphTypeSource
+   : 'CREATE' ('PROPERTY'? 'GRAPH' 'TYPE' ifNotExists? | 'OR' 'REPLACE' 'PROPERTY'? 'GRAPH' 'TYPE') catalogGraphTypeParentAndName graphTypeSource
    ;
 
 graphTypeSource
@@ -346,7 +350,7 @@ copyOfGraphType
 // 12.7 <drop graph statement>
 
 dropGraphTypeStatement
-   : 'DROP' 'PROPERTY'? 'GRAPH' 'TYPE' ('IF' 'EXISTS')? catalogGraphTypeParentAndName
+   : 'DROP' 'PROPERTY'? 'GRAPH' 'TYPE' ifExists? catalogGraphTypeParentAndName
    ;
 
 // 12.8 <call catalog-modifying statement>
@@ -2735,6 +2739,16 @@ elementIdFunction
 letValueExpression
    : 'LET' letVariableDefinitionList 'IN' valueExpression 'END'
    ;
+
+// Convinience rules to make it easy to handle optional phrases in listeners and visitors
+
+ifNotExists
+    : 'IF' 'NOT' 'EXISTS'
+    ;
+
+ifExists
+    : 'IF' 'EXISTS'
+    ;
 
 // Unsectioned below
 
