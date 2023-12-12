@@ -1793,10 +1793,12 @@ bindingTableType
 valueType
     : predefinedType                #predefinedTypeAlt
 
-    // productions from constructedValueType
+    // productions from constructedValueType, the production for listValueType is broken into three equivalent productions
+    // to avoid a left mutually recursive grammar. See the unused listValueType production.
     | PATH notNull?                                                                                                       #pathValueTypeAlt
     | listValueTypeName LEFT_ANGLE_BRACKET valueType RIGHT_ANGLE_BRACKET (LEFT_BRACKET maxLength RIGHT_BRACKET)? notNull?   #listValueTypeAlt1
     | valueType listValueTypeName (LEFT_BRACKET maxLength RIGHT_BRACKET)? notNull? #listValueTypeAlt2
+    | listValueTypeName (LEFT_BRACKET maxLength RIGHT_BRACKET)? notNull? #listValueTypeAlt3
 
     | recordType                                                                                                            #recordTypeAlt
 
