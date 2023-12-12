@@ -7,8 +7,8 @@ options {
 // 6 <GQL-program>
 
 gqlProgram
-   : programActivity sessionCloseCommand?
-   | sessionCloseCommand
+   : programActivity sessionCloseCommand? EOF
+   | sessionCloseCommand EOF
    ;
 
 programActivity
@@ -17,12 +17,8 @@ programActivity
    ;
 
 sessionActivity
-   : sessionActivityCommand+
-   ;
-
-sessionActivityCommand
-   : sessionSetCommand
-   | sessionResetCommand
+   : sessionResetCommand+
+   | sessionSetCommand sessionResetCommand+
    ;
 
 transactionActivity
@@ -145,31 +141,35 @@ nestedProcedureSpecification
    : LEFT_BRACE procedureSpecification RIGHT_BRACE
    ;
 
+// <catalog-modifying procedure specification>, <data-modifying procedure specification> and <query specification> are
+// identical productions. The specification distinguishes them in the BNF, but in the implementation, the distinction
+// has to be made sematically, in code, based on the kind of statements contained in the <procedure specification>.
 procedureSpecification
-   : catalogModifyingProcedureSpecification
-   | dataModifyingProcedureSpecification
-   | querySpecification
+   : procedureBody
+//   : catalogModifyingProcedureSpecification
+//   | dataModifyingProcedureSpecification
+//   | querySpecification
    ;
 
-catalogModifyingProcedureSpecification
-   : procedureBody
-   ;
+//catalogModifyingProcedureSpecification
+//   : procedureBody
+//   ;
 
 nestedDataModifyingProcedureSpecification
-   : LEFT_BRACE dataModifyingProcedureSpecification RIGHT_BRACE
+   : LEFT_BRACE procedureBody RIGHT_BRACE
    ;
 
-dataModifyingProcedureSpecification
-   : procedureBody
-   ;
+//dataModifyingProcedureSpecification
+//   : procedureBody
+//   ;
 
 nestedQuerySpecification
-   : LEFT_BRACE querySpecification RIGHT_BRACE
+   : LEFT_BRACE procedureBody RIGHT_BRACE
    ;
 
-querySpecification
-   : procedureBody
-   ;
+//querySpecification
+//   : procedureBody
+//   ;
 
 // 9.2 <procedure body>
 
@@ -631,8 +631,13 @@ forStatement
    ;
 
 forItem
-   : forItemAlias listValueExpression
+   : forItemAlias forItemSource
    ;
+
+forItemSource
+    : listValueExpression
+    | bindingTableReferenceValueExpression
+    ;
 
 forItemAlias
    : bindingVariable IN
@@ -1934,10 +1939,6 @@ temporalInstantType
    | localtimeType
    ;
 
-temporalDurationType
-   : durationType
-   ;
-
 datetimeType
    : ZONED DATETIME notNull?
    | TIMESTAMP WITH TIME ZONE notNull?
@@ -1961,6 +1962,15 @@ localtimeType
    : LOCAL TIME notNull?
    | TIME WITHOUT TIME ZONE notNull?
    ;
+
+temporalDurationType
+   : 'DURATION' LEFT_PAREN temporalDurationQuantifier RIGHT_PAREN notNull?
+   ;
+
+temporalDurationQuantifier
+    : 'YEAR' 'TO' 'MONTH'
+    | 'DAY' 'TO' 'SECOND'
+    ;
 
 durationType
    : DURATION notNull?
@@ -2040,7 +2050,7 @@ pathValueType
    ;
 
 listValueType
-   : (listValueTypeName LEFT_ANGLE_BRACKET valueType RIGHT_ANGLE_BRACKET | valueType listValueTypeName) (LEFT_BRACKET maxLength RIGHT_BRACKET)? notNull?
+   : (listValueTypeName LEFT_ANGLE_BRACKET valueType RIGHT_ANGLE_BRACKET | valueType? listValueTypeName) (LEFT_BRACKET maxLength RIGHT_BRACKET)? notNull?
    ;
 
 listValueTypeName
