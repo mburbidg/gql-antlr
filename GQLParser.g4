@@ -795,18 +795,6 @@ graphPatternYieldItem
     | pathVariableReference
     ;
 
-//// 16.3 <binding variable reference>
-//
-//bindingVariableReference
-//    : bindingVariable
-//    ;
-//
-//// 16.6 <parameter>
-//
-//parameter
-//    : parameterName
-//    ;
-
 // 16.4 <graph pattern>
 
 graphPattern
@@ -896,10 +884,6 @@ labelAndPropertySetSpecification
    : isOrColon labelSetSpecification elementPropertySpecification?
    | isOrColon labelSetSpecification? elementPropertySpecification
    ;
-
-//labelSetSpecification
-//   : labelName (AMPERSAND labelName)*
-//   ;
 
 // 16.6 <path pattern prefix>
 
@@ -1549,20 +1533,6 @@ nodeTypeLabelSet
 nodeTypePropertyTypes
     : propertyTypesSpecification
     ;
-//
-//nodeTypeFiller
-//   : nodeTypeLabelSetDefinition
-//   | nodeTypePropertyTypeSetDefinition
-//   | nodeTypeLabelSetDefinition nodeTypePropertyTypeSetDefinition
-//   ;
-//
-//nodeTypeLabelSetDefinition
-//   : labelSetDefinition
-//   ;
-//
-//nodeTypePropertyTypeSetDefinition
-//   : propertyTypeSetDefinition
-//   ;
 
 // 18.3 <edge type specification>
 
@@ -1694,59 +1664,6 @@ sourceNodeTypeAlias
 destinationNodeTypeAlias
    : REGULAR_IDENTIFIER
    ;
-//
-//edgeTypeLabelSetDefinition
-//   : labelSetDefinition
-//   ;
-//
-//edgeTypePropertyTypeSetDefinition
-//   : propertyTypeSetDefinition
-//   ;
-//
-//fullEdgeTypePattern
-//   : fullEdgeTypePatternPointingRight
-//   | fullEdgeTypePatternPointingLeft
-//   | fullEdgeTypePatternUndirected
-//   ;
-//
-//fullEdgeTypePatternPointingRight
-//   : sourceNodeTypeReference arcTypePointingRight destinationNodeTypeReference
-//   ;
-//
-//fullEdgeTypePatternPointingLeft
-//   : destinationNodeTypeReference arcTypePointingLeft sourceNodeTypeReference
-//   ;
-//
-//fullEdgeTypePatternUndirected
-//   : sourceNodeTypeReference arcTypeUndirected destinationNodeTypeReference
-//   ;
-//
-//arcTypeFiller
-//   : edgeTypeName? edgeTypeFiller?
-//   ;
-//
-//abbreviatedEdgeTypePattern
-//   : abbreviatedEdgeTypePatternPointingRight
-//   | abbreviatedEdgeTypePatternPointingLeft
-//   | abbreviatedEdgeTypePatternUndirected
-//   ;
-//
-//abbreviatedEdgeTypePatternPointingRight
-//   : sourceNodeTypeReference RIGHT_ARROW destinationNodeTypeReference
-//   ;
-//
-//abbreviatedEdgeTypePatternPointingLeft
-//   : destinationNodeTypeReference LEFT_ARROW sourceNodeTypeReference
-//   ;
-//
-//abbreviatedEdgeTypePatternUndirected
-//   : sourceNodeTypeReference TILDE destinationNodeTypeReference
-//   ;
-//
-//nodeTypeReference
-//   : sourceNodeTypeReference
-//   | destinationNodeTypeReference
-//   ;
 
 // 18.4 <label set phrase> and <label set specification>
 
@@ -2082,12 +1999,6 @@ fieldType
    : fieldName typed? valueType
    ;
 
-//// 18.7 <reference parameter>
-//
-//referenceParameter
-//    : parameter
-//    ;
-
 // 19.1 <search condition>
 
 searchCondition
@@ -2320,20 +2231,11 @@ generalValueSpecification
     | SESSION_USER
     ;
 
-//unsignedIntegerSpecification: valueExpression;
-//
-//parameterValueSpecification
-//    : parameter
-//    | predefinedParameter
-//    ;
-
 // 20.4 <dynamic parameter specification>
 
 dynamicParameterSpecification
     : generalParameterReference
     ;
-
-//predefinedParameter: CURRENT_USER;
 
 // 20.5 <let value expression>
 
@@ -3246,8 +3148,8 @@ recordLiteral
 
 // 21.3 <token>, <separator>, and <identifier>
 
-// The ordering is not preserved from the specification, because of the need to prioritize keywords above
-// identifiers.
+// From here down the ordering from the specification is not preserved, because of the need to prioritize
+// keywords above identifiers.
 
 token
     : nonDelimiterToken
@@ -3878,8 +3780,6 @@ VERTICAL_BAR: '|';
 
 SINGLE_QUOTE: '\'';
 
-// Unsectioned below
-
 digit
     : UNSIGNED_DECIMAL_INTEGER
     ;
@@ -3887,8 +3787,6 @@ digit
 datetimeSubtractionParameters
     : datetimeValueExpression COMMA datetimeValueExpression
     ;
-
-// xx.x <foo>
 
 unbrokenCharacterStringLiteral
     : UNBROKEN_SINGLE_QUOTED_CHARACTER_SEQUENCE
@@ -3906,12 +3804,6 @@ elementTypeName
 valueVariable
     : bindingVariable
     ;
-
-// Scanner Rules
-
-// Working on the lexer, which currently has multiple rules that match the same strings. Trying define primitives and
-// move some of the conflicting productions to the parser. e.g. DELIMITED_IDENTIFIER Also using fragments to void some
-// of these conflicts.
 
 SP
   : (WHITESPACE)+
